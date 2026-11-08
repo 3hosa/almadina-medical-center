@@ -1,0 +1,43 @@
+server {
+    listen ${PORT};
+    server_name localhost;
+    root /usr/share/nginx/html;
+
+    # Include default mime types
+    include /etc/nginx/mime.types;
+
+    # Main routing
+    location / {
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Static assets handling (CSS, JS, Images)
+    # Ensure they return 404 if not found, instead of falling back to index.html
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 30d;
+        access_log off;
+        log_not_found off;
+        try_files $uri =404;
+    }
+
+    # Font assets handling (with custom types and CORS)
+    # Defining types here avoids overriding the global mime.types for the rest of the site
+    location ~* \.(woff|woff2|ttf|eot|otf)$ {
+        types {
+            font/woff2 woff2;
+            font/woff woff;
+            font/ttf ttf;
+            font/otf otf;
+            application/vnd.ms-fontobject eot;
+        }
+        add_header Access-Control-Allow-Origin *;
+        expires 30d;
+        access_log off;
+        log_not_found off;
+        try_files $uri =404;
+    }
+
+    # Custom error pages if needed
+    error_page 404 /index.html;
+}
